@@ -35,8 +35,7 @@ factor n target primes =
     let 
         dividend = div target n 
         remainder = mod target n
-    in do
-    case (dividend, remainder) of 
+    in case (dividend, remainder) of 
       (1, _) -> [target]
       (_, 0) -> n : factor n dividend primes
       (_, _) -> factor (n + 1) target (n : primes)
