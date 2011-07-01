@@ -40,4 +40,24 @@ factor n target primes =
       (_, 0) -> n : factor n dividend primes
       (_, _) -> factor (n + 1) target (n : primes)
 
-main = print (factor 2 600851475143 [])
+doFactor n = factor 2 n []
+
+-- main = print (factor 2 600851475143 [])
+
+
+-- Problem 4
+isPalindrome n = n > 9 && ((fromIntegral n) / (read (reverse (show n))::Double)) == 1.0
+
+allSums [] = []
+allSums xs = map (\ x -> head xs * x) xs ++ allSums (tail xs)
+    
+largestPalindrome largest [] = largest
+largestPalindrome largest sums = 
+    let sum = head sums in
+    if isPalindrome sum && sum > largest 
+    then
+        largestPalindrome sum (tail sums)
+    else 
+        largestPalindrome largest (tail sums)
+
+main = print (largestPalindrome 0 (allSums [1..999]))
