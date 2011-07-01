@@ -22,30 +22,23 @@ genFib max n =
 
 -- Problem 3
 divides n [] = False
+divides 2 _ = False
 divides n primes = 
     let prime = head primes in
     if mod n prime == 0 then True else divides n (tail primes)
 
                 
-primeGen [] primes = primes
+factor n 1 primes = []
 
-primeGen numbers primes =
-    let number = head numbers in
-    if divides number primes
-    then primeGen (tail numbers) primes
-    else primeGen (tail numbers) (number : primes)
-
-primes n = primeGen [2..n] [2]
-
-factor :: (Integral a) => a -> [a] -> [(a, a)]
-factor target [] = []
-
-factor target primes = 
+factor n target primes = 
+    if divides n primes then factor (n + 1) target primes else
     let 
-        prime = head primes 
-        divided = div target prime
-    in
-    if mod target prime == 0 
-    then (prime, divided) : factor divided (tail primes)
-    else factor target (tail primes)
-    
+        dividend = div target n 
+        remainder = mod target n
+    in do
+    case (dividend, remainder) of 
+      (1, _) -> [target]
+      (_, 0) -> n : factor n dividend primes
+      (_, _) -> factor (n + 1) target (n : primes)
+
+main = print (factor 2 600851475143 [])
