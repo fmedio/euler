@@ -53,11 +53,22 @@ allSums xs = map (\ x -> head xs * x) xs ++ allSums (tail xs)
     
 largestPalindrome largest [] = largest
 largestPalindrome largest sums = 
-    let sum = head sums in
-    if isPalindrome sum && sum > largest 
-    then
-        largestPalindrome sum (tail sums)
-    else 
-        largestPalindrome largest (tail sums)
+    let 
+        sum = head sums 
+        next = if isPalindrome sum && sum > largest then sum else largest
+    in
+    largestPalindrome next (tail sums)
 
-main = print (largestPalindrome 0 (allSums [1..999]))
+-- main = print (largestPalindrome 0 (allSums [1..999]))
+
+-- Problem 5
+smallestDivisor :: (Integral t) => [t] -> t 
+smallestDivisor xs = foldl1 lcm xs
+
+-- main = print (smallestDivisor [1..20])
+
+-- Problem 6
+sumOfSquares n = foldl (\ a b -> a + b * b) 0 [1..n]
+squareOfSum n = (foldl (+) 0 [1..n]) ^ 2
+
+main = print ((squareOfSum 100) - (sumOfSquares 100))
