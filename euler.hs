@@ -1,6 +1,6 @@
 import Data.Char (digitToInt)
 import qualified Data.Set as Set
-import qualified List as List
+import qualified Data.List as List
 
 -- Problem 1
 addMultiples = foldl (\ m n -> if mod n 3 == 0 || mod n 5 == 0 then m + n else m) 0
@@ -135,9 +135,14 @@ problem16 = sum . map digitToInt . show $ 2 ^ 1000
 
 -- Problem 20
 
-problem20 = sum . map digitToInt . show $ factorial [1..100] where
-    factorial [] = 1
-    factorial (x:xs) = x * (factorial xs)
+problem20 = sum . map digitToInt . show $ product [1..100]
 
 
-    
+-- Problem 21
+divisors n = Set.fromList $ map product $ List.subsequences $ doFactor n    
+sumOfDivisors n = Set.fold (+) (-n) $ divisors n
+amicablePairs n = [(a,b) | a <- [1..n], b <- [a..n], sumOfDivisors a == b && sumOfDivisors b == a && a /= b]
+
+problem21 n = foldl (\ total tuple -> total + fst tuple + snd tuple) 0 $ amicablePairs n
+
+-- main = print $ problem21 10000
