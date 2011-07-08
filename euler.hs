@@ -110,6 +110,34 @@ problem12 n = head $ filter ((> n) . divisorCount) (triangles [1..])
 -- main = print $ problem12 500
 
 
+-- Problem 13
+
+problem13 = (print . take 10 . show . sum) [10000000000, 12345678912234]
 
 
-                                   
+-- Problem 14
+
+problem14 xs = foldl compareTuples (0,0) [ (x, (length . expand) x) | x <- xs ] 
+               where
+                 expand 1 = [1]
+                 expand n = n : expand (if even n then div n 2 else 3 * n + 1)
+                 compareTuples a b = if snd a > snd b then a else b
+
+-- main = print $ problem14 [1..1000000]
+
+
+-- Problem 16
+
+problem16 = sum . map digitToInt . show $ 2 ^ 1000
+
+-- main = print problem16
+
+
+-- Problem 20
+
+problem20 = sum . map digitToInt . show $ factorial [1..100] where
+    factorial [] = 1
+    factorial (x:xs) = x * (factorial xs)
+
+
+    
