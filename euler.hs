@@ -146,3 +146,15 @@ amicablePairs n = [(a,b) | a <- [1..n], b <- [a..n], sumOfDivisors a == b && sum
 problem21 n = foldl (\ total tuple -> total + fst tuple + snd tuple) 0 $ amicablePairs n
 
 -- main = print $ problem21 10000
+
+
+-- Problem 25
+
+betterFib = map fst $ iterate (\(a,b) -> (b, a+b)) (0,1)
+problem25 = length $ takeWhile (\a -> length (show a) < 1000) betterFib
+
+
+-- Problem 29
+problem29 = Set.size $ Set.fromList [ a^b | a <- [2..100] , b <- [2..100]]
+
+
