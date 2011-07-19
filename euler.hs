@@ -128,7 +128,7 @@ problem14 xs = foldl compareTuples (0,0) [ (x, (length . expand) x) | x <- xs ]
 
 -- Problem 16
 
-problem16 = sum . map digitToInt . show $ 2 ^ 1000
+problem16 = (sum . map digitToInt . show) $ 2 ^ 1000
 
 -- main = print problem16
 
@@ -157,4 +157,15 @@ problem25 = length $ takeWhile (\a -> length (show a) < 1000) betterFib
 -- Problem 29
 problem29 = Set.size $ Set.fromList [ a^b | a <- [2..100] , b <- [2..100]]
 
+
+-- Problem 48 
+problem48 = (reverse . take 10 . reverse . show) $ foldl (\ a b -> a + (b ^ b)) 0 [1..1000]
+
+
+-- Problem 52
+problem52 = ((+) 1) . length $ takeWhile (\a -> not $ compareMultiple a [2..6]) [1..]
+            where
+              compareDigits a b = (List.sort $ show a) == (List.sort $ show b)
+              compareMultiple n [] = True
+              compareMultiple n (x:xs) = if not $ compareDigits n (x * n) then False else compareMultiple n xs
 
