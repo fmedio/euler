@@ -1,4 +1,4 @@
--- Toying with non-integer matrix factorization. 
+-- Toying with non-negative matrix factorization. 
 -- See http://hebb.mit.edu/people/seung/papers/nmfconverge.pdf for details.
 
 module Matrix where
@@ -26,7 +26,7 @@ update :: (Fractional a) => [[a]] -> ([[a]], [[a]]) -> ([[a]], [[a]])
 update v (w, h) = (w', h')
                    where                  
                    h' = h ^^^ (transpose w *** v) /// (transpose w *** w *** h)
-                   w' = w ^^^ (v *** transpose h) /// (w *** h *** transpose h)
+                   w' = w ^^^ (v *** transpose h') /// (w *** h' *** transpose h')
 
 divergence [] [] = 0
 divergence (x:xs) (y:ys) = (sum $ zipWith (\ a b -> (a - b)^2) x y) + divergence xs ys
