@@ -169,3 +169,4 @@ problem52 = ((+) 1) . length $ takeWhile (\a -> not $ compareMultiple a [2..6]) 
               compareMultiple n [] = True
               compareMultiple n (x:xs) = if not $ compareDigits n (x * n) then False else compareMultiple n xs
 
+
