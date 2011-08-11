@@ -46,6 +46,3 @@ doFactor v dimensions iterations = factor v (w, h) iterations
                           w = emptyMatrix (matrixWidth v) dimensions 1
                           h = emptyMatrix dimensions (matrixLength v) 1
 
-
-
-
