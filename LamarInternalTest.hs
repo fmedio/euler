@@ -7,20 +7,36 @@ import LamarInternal
 test1 = TestCase (assertEqual "" (1,2) (1,2))
 test2 = TestCase (assertEqual "" (1,2) (1,2))
 
-testTreePath = TestCase (assertEqual "treePath" [0,0,0,0,1,101] (treePath 23423423))
+pipeline :: a -> [a -> a] -> a
+pipeline x [] = x
+pipeline x (f:fs) = pipeline (f x) fs
 
-testUpdateBlankLeaf = TestCase
-                 (let empty = map toWord32 [0 | i <- [1 .. 2048]]
-                      expected = updateElement empty 1 (\ a -> 1)
-                  in
-                   assertEqual "testUpdateBlankLeaf" (Leaf expected) (updateLeaf Nil Set 63))
+tests = TestList [
+  TestCase (let loc = location 0 in
+             assertEqual "mask 0" (2^31) (mask loc)),
 
-testUpdateExistingLeaf = TestCase
-                 (let one = updateLeaf Nil Set 63
-                      two = updateLeaf one Unset 63
-                  in
-                   assertEqual "testUpdateExistingLeaf" 0 (values two !! 1))
+  TestCase (let loc = location 1 in
+             assertEqual "mask 1" (2^30) (mask loc)),
 
-                         
-tests = TestList [testTreePath, testUpdateBlankLeaf, testUpdateExistingLeaf]
+  TestCase (let loc = location 32 in
+             assertEqual "mask 32" (2^31) (mask loc)),
+  
+  TestCase (let loc = location 32 in
+             assertEqual "index 32" 1 (index loc)),
+
+  TestCase (let tree = update Nil Set 1 in
+             assertBool "set 1" (get tree 1)),
+  
+  TestCase (let tree = update Nil Set 32 in
+             assertBool "set 32" (get tree 32)),
+
+  TestCase (let tree = pipeline Nil
+                       [
+                         (\t -> update t Set 32),
+                         (\t -> update t Unset 32)
+                       ]
+            in assertBool "set unset 32" $ not (get tree 32))
+
+  ]
+             
 

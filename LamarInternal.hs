@@ -1,56 +1,89 @@
 module LamarInternal (Tree(Leaf,Node,Nil),
-                      Op(Set,Unset),
-                      treePath,
                       values,
-                      updateElement,
+                      Op(Set,Unset),
+                      Location(x, path, index, mask),
+                      location,
+                      updateSequence,
                       updateLeaf,
-                      toWord32) where
+                      get,
+                      update) where
 import Data.Word
 import Data.Bits
+--import Debug.Trace
 
 data Tree = Node {children :: [Tree]} |
             Leaf {values :: [Word32]} |
             Nil deriving (Show, Eq)
-            
+
 data Op = Set | Unset
 
-treePath :: Word64 -> [Word8]
-treePath x = take 6 $ map (fromIntegral . (shiftR x)) [56, 48..0] 
+data Location = Location {
+  x :: Word64,
+  path :: [Word8],
+  index :: Int,
+  mask :: Word32 } deriving (Show, Eq)
 
-updateLeaf :: Tree -> Op -> Word64 -> Tree
-updateLeaf t op x =
-  let values = case t of
-        Nil -> map toWord32 [0 | i <- [1 .. 2048]]
-        Leaf xs -> xs
-        Node children -> map toWord32 [0 | i <- [1 .. 2048]]
-      pathOffset = fromIntegral (x .&. 0x000000000000ffff)
-      index = floor $ fromIntegral pathOffset / 32
-      mask = shiftR (0x80000000::Word32) $ mod pathOffset 32
-      f a = case op of
-        Set -> (a .|. mask)
-        Unset -> (a .&. (complement mask))
-      updated = updateElement values index f
-  in
-   Leaf updated
-   
-insert :: Word64 -> Tree -> Tree
-insert x t =
+location :: Word64 -> Location 
+location x =
   let
-    p = take 6 $ treePath x
+    path = take 6 $ map (fromIntegral . (shiftR x)) [56, 48..0] 
     pathOffset = fromIntegral (x .&. 0x000000000000ffff)
     index = floor $ fromIntegral pathOffset / 32
-    mask = shiftR (0x80000000::Word32) $ mod pathOffset 32
+    mask = shiftR (0x80000000::Word32) $ (mod pathOffset 32)
+  in Location x path index mask
+
+pop :: Location -> Location
+pop l = Location (x l) (tail (path l)) (index l) (mask l)
+
+current :: Location -> Integer
+current l = toInteger (head (path l))
+
+updateLeaf :: Tree -> Op -> Location -> Tree
+updateLeaf t op l  =
+  let values = case t of
+        Leaf xs -> xs
+        _ -> [(fromIntegral 0)::Word32 | i <- [1 .. 2048]]
+      f a = case op of
+        Set -> (a .|. mask l)
+        Unset -> (a .&. (complement $ mask l))
+      updated = updateSequence values (toInteger (index l)) f
   in
-   Leaf []
+   Leaf updated
 
-toWord32 :: Int -> Word32                             
-toWord32 x = (fromIntegral x) :: Word32
+updateTree :: Location -> Op -> Tree -> Tree
+updateTree l op t =
+  case (path l) of
+    []     -> updateLeaf t op l
+    (p:ps) -> case t of
+      Node children   -> Node (updateSequence children (current l) (updateTree (pop l) op))
+      _               -> Node (updateSequence [Nil | i <- [1 .. 256]] (current l) (updateTree (pop l) op))
 
-updateElement :: [a] -> Integer -> (a -> a) -> [a]
-updateElement [] _ _ = []
-updateElement (x:xs) index f =
+
+update :: Tree -> Op -> Word64 -> Tree
+update t op x = case t of
+  Node children -> updateTree (location x) op t
+  _             -> updateTree (location x) op (Node [Nil | i <- [1 .. 256]])
+
+get :: Tree -> Word64 -> Bool
+get t x = get' t (location x)
+  
+get' :: Tree -> Location -> Bool
+get' t l = case t of
+  Leaf values     -> ((values !! (index l)) .&. (mask l)) /= 0
+  Node children   ->
+    let
+      i = current l
+      child = (children !! (fromIntegral(i)::Int))     
+    in
+      get' child (pop l)    
+  Nil             -> False
+
+
+updateSequence :: [a] -> Integer -> (a -> a) -> [a]
+updateSequence [] _ _ = []
+updateSequence (x:xs) index f =
   case index of
-    0 -> (f x) : updateElement xs (-1) f
-    _ -> x : updateElement xs (index - 1) f
+    0 -> (f x) : updateSequence xs (-1) f
+    _ -> x : updateSequence xs (index - 1) f
 
 
