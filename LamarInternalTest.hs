@@ -11,6 +11,7 @@ pipeline :: a -> [a -> a] -> a
 pipeline x [] = x
 pipeline x (f:fs) = pipeline (f x) fs
 
+
 tests = TestList [
   TestCase (let loc = location 0 in
              assertEqual "mask 0" (2^31) (mask loc)),
@@ -35,8 +36,12 @@ tests = TestList [
                          (\t -> update t Set 32),
                          (\t -> update t Unset 32)
                        ]
-            in assertBool "set unset 32" $ not (get tree 32))
+            in assertBool "set unset 32" $ not (get tree 32)),
 
+  TestCase (let tree = foldr (\ x t -> update t Set x) Nil [1..10]
+            in assertEqual "cardinality 10" 10 (cardinality tree)),
+
+  TestCase (assertEqual "bits set in 5" 2 (bitsSet 5))
   ]
              
 

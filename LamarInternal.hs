@@ -6,10 +6,12 @@ module LamarInternal (Tree(Leaf,Node,Nil),
                       updateSequence,
                       updateLeaf,
                       get,
-                      update) where
+                      update,
+                      cardinality,
+                      bitsSet) where
 import Data.Word
 import Data.Bits
---import Debug.Trace
+import Debug.Trace
 
 data Tree = Node {children :: [Tree]} |
             Leaf {values :: [Word32]} |
@@ -86,4 +88,28 @@ updateSequence (x:xs) index f =
     0 -> (f x) : updateSequence xs (-1) f
     _ -> x : updateSequence xs (index - 1) f
 
+
+cardinality :: Tree -> Word64
+cardinality t =
+  case t of
+    Nil           -> 0
+    Leaf values   ->
+      let
+        f [] = (fromIntegral 0)::Word64
+        f (x:xs) = ((fromIntegral $ bitsSet x)::Word64) + (f xs)
+      in
+       f values
+    Node children ->
+      let f [] = 0
+          f (n:ns) = (cardinality n) + (f ns)
+      in
+       f children
+
+bitsSet :: Word32 -> Int
+bitsSet 0 = 0
+bitsSet x =
+  let last = (fromIntegral (x .&. 0x00000001))::Int in
+  case x of
+    0 -> 0
+    _ -> last + bitsSet (shiftR x 1)
 
