@@ -13,10 +13,11 @@ import Data.Word
 import Data.Bits
 import Debug.Trace
 import Data.HashMap
+import Data.Array.IO as Array
 
 data Tree = Node {children :: Map Int Tree} |
             Leaf {values :: Map Int Word32} |
-            Nil deriving (Show, Eq)
+            Nil 
 
 data Op = Set | Unset
 
@@ -34,9 +35,9 @@ location x =
     index = floor $ fromIntegral pathOffset / 32
     mask = shiftR (0x80000000::Word32) $ (mod pathOffset 32)
   in Location x path index mask
-
+  
 pop :: Location -> Location
-pop l = Location (x l) (tail (path l)) (index l) (mask l)
+pop l = Location (x l) (tail (path l)) (LamarInternal.index l) (mask l)
 
 current :: Location -> Int
 current l = fromIntegral (head (path l))::Int
@@ -51,8 +52,8 @@ updateLeaf t op l  =
         Unset -> (a .&. (complement $ mask l))
   in
    let
-     value = findWithDefault 0 (index l) values
-     updatedValues = insert (index l) (f value) values
+     value = findWithDefault 0 (LamarInternal.index l) values
+     updatedValues = insert (LamarInternal.index l) (f value) values
    in
     Leaf updatedValues
 
@@ -78,7 +79,7 @@ get t x = get' t (location x)
   
 get' :: Tree -> Location -> Bool
 get' t l = case t of
-  Leaf values     -> ((findWithDefault 0 (index l) values) .&. (mask l)) /= 0
+  Leaf values     -> ((findWithDefault 0 (LamarInternal.index l) values) .&. (mask l)) /= 0
   Node children   ->
     let
       i = current l

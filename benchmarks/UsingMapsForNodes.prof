@@ -1,0 +1,73 @@
+	Fri Sep 13 01:58 2013 Time and Allocation Profiling Report  (Final)
+
+	   foo.exe +RTS -p -RTS
+
+	total time  =        1.41 secs   (1408 ticks @ 1000 us, 1 processor)
+	total alloc = 1,088,481,764 bytes  (excludes profiling overheads)
+
+COST CENTRE    MODULE        %time %alloc
+
+updateSequence LamarInternal  98.7   97.8
+
+
+                                                                            individual     inherited
+COST CENTRE                    MODULE                     no.     entries  %time %alloc   %time %alloc
+
+MAIN                           MAIN                        77           0    0.1    0.0   100.0  100.0
+ main                          Main                       155           0    0.0    0.0     0.0    0.0
+ CAF                           GHC.IO.Encoding.CodePage   140           0    0.0    0.0     0.0    0.0
+ CAF                           GHC.IO.Encoding            129           0    0.0    0.0     0.0    0.0
+ CAF                           GHC.IO.Handle.FD           124           0    0.0    0.0     0.0    0.0
+ CAF                           Data.Hashable.Class        111           0    0.0    0.0     0.0    0.0
+ CAF:main1                     Main                       108           0    0.0    0.0     0.0    0.0
+  main                         Main                       154           1    0.0    0.0     0.0    0.0
+ CAF:main2                     Main                       107           0    0.0    0.0     0.0    0.0
+  main                         Main                       156           0    0.0    0.0     0.0    0.0
+ CAF:main3                     Main                       106           0    0.0    0.0     0.0    0.0
+  main                         Main                       157           0    0.0    0.0     0.0    0.0
+ CAF:main_c                    Main                       105           0    0.0    0.0     0.0    0.0
+  main                         Main                       158           0    0.0    0.0     0.0    0.0
+   main.c                      Main                       159           1    0.0    0.0     0.0    0.0
+    cardinality                Main                       160           1    0.0    0.0     0.0    0.0
+     cardinality               LamarInternal              161           7    0.0    0.0     0.0    0.0
+      cardinality.f            LamarInternal              183        2049    0.0    0.0     0.0    0.0
+       bitsSet.last            LamarInternal              197         313    0.0    0.0     0.0    0.0
+       bitsSet                 LamarInternal              196       12063    0.0    0.0     0.0    0.0
+        bitsSet.last           LamarInternal              198        9702    0.0    0.0     0.0    0.0
+      cardinality.\            LamarInternal              178           6    0.0    0.0     0.0    0.0
+ CAF:main_tree                 Main                       104           0    0.0    0.0    99.9   99.9
+  main                         Main                       162           0    0.0    0.0    99.9   99.9
+   main.tree                   Main                       163           1    0.0    0.0    99.9   99.9
+    build_tree                 Main                       164           1    0.0    0.0    99.9   99.9
+     main.tree.\               Main                       168       10000    0.0    0.0    99.9   99.9
+      update                   LamarInternal              169       10000    0.0    0.0    99.9   99.9
+       updateTree              LamarInternal              171       70000    0.1    0.4    99.4   99.3
+        updateLeaf             LamarInternal              182       10000    0.0    0.0    98.7   97.9
+         updateLeaf.updated    LamarInternal              189       10000    0.1    0.0    98.7   97.9
+          updateSequence       LamarInternal              190    20490000   98.7   97.8    98.7   97.8
+           updateLeaf.f        LamarInternal              193       10000    0.0    0.0     0.0    0.0
+         updateLeaf.values     LamarInternal              184       10000    0.0    0.0     0.0    0.0
+        updateTree.child       LamarInternal              180       60000    0.0    0.1     0.0    0.1
+         current               LamarInternal              181       60000    0.0    0.0     0.0    0.0
+        updateTree.newChildren LamarInternal              176       60000    0.6    0.9     0.6    1.0
+         pop                   LamarInternal              179       60000    0.0    0.0     0.0    0.0
+         current               LamarInternal              177       60000    0.0    0.0     0.0    0.0
+        updateTree.nodes       LamarInternal              175       60000    0.1    0.0     0.1    0.0
+       location                LamarInternal              170       10000    0.1    0.1     0.5    0.6
+        location.mask          LamarInternal              195       10000    0.0    0.0     0.0    0.0
+        location.pathOffset    LamarInternal              192       10000    0.0    0.0     0.0    0.0
+        location.index         LamarInternal              191       10000    0.0    0.0     0.0    0.0
+        location.path          LamarInternal              172       10000    0.4    0.5     0.4    0.5
+ CAF:main4                     Main                       103           0    0.0    0.0     0.0    0.1
+  main                         Main                       165           0    0.0    0.0     0.0    0.1
+   main.tree                   Main                       166           0    0.0    0.0     0.0    0.1
+    build_tree                 Main                       167           0    0.0    0.1     0.0    0.1
+ CAF:get2                      LamarInternal              102           0    0.0    0.0     0.0    0.0
+  location                     LamarInternal              173           0    0.0    0.0     0.0    0.0
+   location.path               LamarInternal              174           0    0.0    0.0     0.0    0.0
+ CAF:updateLeaf1               LamarInternal              101           0    0.0    0.0     0.0    0.0
+  updateLeaf                   LamarInternal              185           0    0.0    0.0     0.0    0.0
+   updateLeaf.values           LamarInternal              186           0    0.0    0.0     0.0    0.0
+ CAF:updateLeaf2               LamarInternal              100           0    0.0    0.0     0.0    0.0
+  updateLeaf                   LamarInternal              187           0    0.0    0.0     0.0    0.0
+   updateLeaf.values           LamarInternal              188           0    0.0    0.0     0.0    0.0
