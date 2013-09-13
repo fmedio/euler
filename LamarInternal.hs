@@ -6,15 +6,16 @@ module LamarInternal (Tree(Leaf,Node,Nil),
                       updateSequence,
                       updateLeaf,
                       get,
-                      update,
+                      LamarInternal.update,
                       cardinality,
                       bitsSet) where
 import Data.Word
 import Data.Bits
 import Debug.Trace
+import Data.HashMap
 
-data Tree = Node {children :: [Tree]} |
-            Leaf {values :: [Word32]} |
+data Tree = Node {children :: Map Int Tree} |
+            Leaf {values :: Map Int Word32} |
             Nil deriving (Show, Eq)
 
 data Op = Set | Unset
@@ -28,7 +29,7 @@ data Location = Location {
 location :: Word64 -> Location 
 location x =
   let
-    path = take 6 $ map (fromIntegral . (shiftR x)) [56, 48..0] 
+    path = take 6 $ Prelude.map (fromIntegral . (shiftR x)) [56, 48..0] 
     pathOffset = fromIntegral (x .&. 0x000000000000ffff)
     index = floor $ fromIntegral pathOffset / 32
     mask = shiftR (0x80000000::Word32) $ (mod pathOffset 32)
@@ -37,45 +38,51 @@ location x =
 pop :: Location -> Location
 pop l = Location (x l) (tail (path l)) (index l) (mask l)
 
-current :: Location -> Integer
-current l = toInteger (head (path l))
+current :: Location -> Int
+current l = fromIntegral (head (path l))::Int
 
 updateLeaf :: Tree -> Op -> Location -> Tree
 updateLeaf t op l  =
   let values = case t of
-        Leaf xs -> xs
-        _ -> [(fromIntegral 0)::Word32 | i <- [1 .. 2048]]
+        Leaf values -> values
+        _           -> empty
       f a = case op of
         Set -> (a .|. mask l)
         Unset -> (a .&. (complement $ mask l))
-      updated = updateSequence values (toInteger (index l)) f
   in
-   Leaf updated
+   let
+     value = findWithDefault 0 (index l) values
+     updatedValues = insert (index l) (f value) values
+   in
+    Leaf updatedValues
 
 updateTree :: Location -> Op -> Tree -> Tree
 updateTree l op t =
   case (path l) of
     []     -> updateLeaf t op l
-    (p:ps) -> case t of
-      Node children   -> Node (updateSequence children (current l) (updateTree (pop l) op))
-      _               -> Node (updateSequence [Nil | i <- [1 .. 256]] (current l) (updateTree (pop l) op))
+    (p:ps) -> 
+      let nodes = case t of {Node children -> children; _ -> empty}
+      in
+       let child = findWithDefault Nil (current l) nodes
+           newChildren = insert (current l) (updateTree (pop l) op child) nodes
+       in Node newChildren
 
 
 update :: Tree -> Op -> Word64 -> Tree
 update t op x = case t of
   Node children -> updateTree (location x) op t
-  _             -> updateTree (location x) op (Node [Nil | i <- [1 .. 256]])
+  _             -> updateTree (location x) op (Node empty)
 
 get :: Tree -> Word64 -> Bool
 get t x = get' t (location x)
   
 get' :: Tree -> Location -> Bool
 get' t l = case t of
-  Leaf values     -> ((values !! (index l)) .&. (mask l)) /= 0
+  Leaf values     -> ((findWithDefault 0 (index l) values) .&. (mask l)) /= 0
   Node children   ->
     let
       i = current l
-      child = (children !! (fromIntegral(i)::Int))     
+      child = findWithDefault Nil i children 
     in
       get' child (pop l)    
   Nil             -> False
@@ -93,18 +100,9 @@ cardinality :: Tree -> Word64
 cardinality t =
   case t of
     Nil           -> 0
-    Leaf values   ->
-      let
-        f [] = (fromIntegral 0)::Word64
-        f (x:xs) = ((fromIntegral $ bitsSet x)::Word64) + (f xs)
-      in
-       f values
-    Node children ->
-      let f [] = 0
-          f (n:ns) = (cardinality n) + (f ns)
-      in
-       f children
-
+    Leaf values   -> fold (\v count -> count + (fromIntegral $ bitsSet v)::Word64) 0 values
+    Node children -> fold (\t count -> count + (cardinality t)) 0 children
+                                      
 bitsSet :: Word32 -> Int
 bitsSet 0 = 0
 bitsSet x =
