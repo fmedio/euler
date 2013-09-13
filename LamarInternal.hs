@@ -3,7 +3,6 @@ module LamarInternal (Tree(Leaf,Node,Nil),
                       Op(Set,Unset),
                       Location(x, path, index, mask),
                       location,
-                      updateSequence,
                       updateLeaf,
                       get,
                       LamarInternal.update,
@@ -87,15 +86,6 @@ get' t l = case t of
     in
       get' child (pop l)    
   Nil             -> False
-
-
-updateSequence :: [a] -> Integer -> (a -> a) -> [a]
-updateSequence [] _ _ = []
-updateSequence (x:xs) index f =
-  case index of
-    0 -> (f x) : updateSequence xs (-1) f
-    _ -> x : updateSequence xs (index - 1) f
-
 
 cardinality :: Tree -> Word64
 cardinality t =
