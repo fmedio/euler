@@ -170,3 +170,8 @@ problem52 = ((+) 1) . length $ takeWhile (\a -> not $ compareMultiple a [2..6]) 
               compareMultiple n (x:xs) = if not $ compareDigits n (x * n) then False else compareMultiple n xs
 
 
+
+take' :: i -> [a] -> [a]
+take' 0 xs = xs
+take' _ [] = []
+take' i (x:xs) = x : (take' (i - 1) xs)

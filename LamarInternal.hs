@@ -12,7 +12,7 @@ import Data.Word
 import Data.Bits
 import Debug.Trace
 import Data.HashMap
-import Data.Array.IO as Array
+
 
 data Tree = Node {children :: Map Int Tree} |
             Leaf {values :: Map Int Word32} |
